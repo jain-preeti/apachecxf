@@ -3,6 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:simple="http://cxf.apache.org/simple"
     xmlns:soap="http://cxf.apache.org/bindings/soap" xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="
     http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -13,6 +14,8 @@ http://cxf.apache.org/simple http://cxf.apache.org/schemas/simple.xsd
 http://cxf.apache.org/bindings/soap
 http://cxf.apache.org/schemas/configuration/soap.xsd
 http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+http://www.springframework.org/schema/util 
+http://www.springframework.org/schema/util/spring-util.xsd
 ">
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
     <import resource="classpath:META-INF/cxf/cxf.xml" />
@@ -23,10 +26,32 @@ http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
         <jaxws:binding>
             <soap:soapBinding style="document" use="literal" version="1.1" />
         </jaxws:binding>
+        <jaxws:inInterceptors>
+        <ref bean="securityInterceptor"/>
+      </jaxws:inInterceptors>
+      <jaxws:handlers>
+        <ref bean="securityHandler"/>
+        </jaxws:handlers>
     </jaxws:endpoint>
+    
+    
+    <bean id="securityInterceptor" class="org.madbit.soap.BasicAuthAuthorizationInterceptor">
+      <property name="users"> 
+        <map>
+          <entry key="preeti" value="123"/>
+        </map>
+      </property>
+    </bean>
+    
+    <bean id="securityHandler" class="org.madbit.soap.WSSecurityHeaderSOAPHandler">
+    <constructor-arg index="0" type="java.lang.String" value="preeti"/>       
+        <constructor-arg index="1" type="java.lang.String" value="123"/>
+    </bean>
     
     <!--  <jaxws:client serviceClass="org.madbit.soap.MyService" address="http://localhost:8080/Apachecxf/soap/MyService" id="myService"/>
     <bean class="org.madbit.soap.MyServiceClient" id="client">
         <property name="myService" ref="myService"/>
     </bean> -->
+  
+   
 </beans>
