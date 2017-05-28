@@ -1,57 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:simple="http://cxf.apache.org/simple"
-    xmlns:soap="http://cxf.apache.org/bindings/soap" xmlns:jaxws="http://cxf.apache.org/jaxws"
-    xmlns:util="http://www.springframework.org/schema/util"
-    xsi:schemaLocation="
-    http://www.springframework.org/schema/beans
-http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-http://www.springframework.org/schema/aop
-http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
-http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
-http://cxf.apache.org/simple http://cxf.apache.org/schemas/simple.xsd
-http://cxf.apache.org/bindings/soap
-http://cxf.apache.org/schemas/configuration/soap.xsd
-http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
-http://www.springframework.org/schema/util 
-http://www.springframework.org/schema/util/spring-util.xsd
-">
-    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
-    <import resource="classpath:META-INF/cxf/cxf.xml" />
-    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
-    <bean id="myServiceImpl" class="org.madbit.soap.MyServiceImpl" />
-    <jaxws:endpoint implementor="#myServiceImpl"
-        address="/MyService">
-        <jaxws:binding>
-            <soap:soapBinding style="document" use="literal" version="1.1" />
-        </jaxws:binding>
-        <jaxws:inInterceptors>
-        <ref bean="securityInterceptor"/>
-      </jaxws:inInterceptors>
-      <jaxws:handlers>
-        <ref bean="securityHandler"/>
-        </jaxws:handlers>
-    </jaxws:endpoint>
-    
-    
-    <bean id="securityInterceptor" class="org.madbit.soap.BasicAuthAuthorizationInterceptor">
-      <property name="users"> 
-        <map>
-          <entry key="preeti" value="123"/>
-        </map>
-      </property>
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+ xsi:schemaLocation="
+ http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+ <import resource="classpath:META-INF/cxf/cxf.xml" />
+ <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+ <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+
+ <bean id="logInBound" class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+ <bean id="logOutBound" class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+<bean id="myServiceImpl" class="org.madbit.soap.MyServiceImpl" />
+ <jaxws:endpoint 
+ implementor="#myServiceImpl" address="/MyService">
+ <jaxws:inInterceptors>
+ <ref bean="logInBound" />
+ <ref bean="inbound-security" />
+ </jaxws:inInterceptors>
+ <jaxws:outInterceptors>
+ <ref bean="logOutBound" />
+<!--  <ref bean="outbound-security" /> -->
+ </jaxws:outInterceptors>
+ </jaxws:endpoint>
+
+ <!--  WSS4JInInterceptor for decrypting and validating the signature of inbound SOAP -->
+    <bean id="inbound-security" class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="UsernameToken"/>
+                <!-- <entry key="signaturePropFile" value="server-crypto.properties"/> -->
+               <!--  <entry key="decryptionPropFile" value="server-crypto.properties"/> -->
+                <entry key="passwordCallbackClass" value="org.madbit.soap.ServerPasswordCallback"/>
+            </map>
+        </constructor-arg>
     </bean>
     
-    <bean id="securityHandler" class="org.madbit.soap.WSSecurityHeaderSOAPHandler">
-    <constructor-arg index="0" type="java.lang.String" value="preeti"/>       
-        <constructor-arg index="1" type="java.lang.String" value="123"/>
-    </bean>
-    
-    <!--  <jaxws:client serviceClass="org.madbit.soap.MyService" address="http://localhost:8080/Apachecxf/soap/MyService" id="myService"/>
-    <bean class="org.madbit.soap.MyServiceClient" id="client">
-        <property name="myService" ref="myService"/>
-    </bean> -->
-  
-   
+    <!-- WSS4JOutInterceptor for signing and encrypting outbound SOAP -->     
+  <!--   <bean id="outbound-security" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="UsernameToken"/>  
+                <entry key="user" value="server"/>               
+                <entry key="signaturePropFile" value="server-crypto.properties"/>
+                <entry key="encryptionPropFile" value="server-crypto.properties"/>
+                <entry key="encryptionUser" value="useReqSigCert"/>
+                <entry key="passwordCallbackClass" value="org.madbit.soap.ServerPasswordCallback"/>
+                <entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>
+                <entry key="encryptionParts" value="{Content}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>
+                <entry key="encryptionSymAlgorithm" value="http://www.w3.org/2001/04/xmlenc#tripledes-cbc"/>
+            </map>
+        </constructor-arg>
+    </bean>   
+   -->  
 </beans>
