@@ -27,6 +27,7 @@ public class EFTSendReceive
     public static BufferedOutputStream wr;
     public static InputStream in;
     public static BufferedInputStream rd;
+    
 
     public static void main(String [] str)
     {
