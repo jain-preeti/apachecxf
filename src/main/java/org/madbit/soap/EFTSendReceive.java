@@ -24,6 +24,7 @@ public class EFTSendReceive
     private static BufferedReader inputStream = null;
     public static Socket clientSock;
     public static OutputStream out;
+    
     public static BufferedOutputStream wr;
     public static InputStream in;
     public static BufferedInputStream rd;    
