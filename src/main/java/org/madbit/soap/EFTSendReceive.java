@@ -28,7 +28,8 @@ public class EFTSendReceive
     public static InputStream in;
     public static BufferedInputStream rd;    
 
-       public static void main(String [] str)
+   
+    public static void main(String [] str)
     {
     	System.out.println(Integer.parseInt("11", 16));
     	System.out.println(Integer.toString(11, 16));
